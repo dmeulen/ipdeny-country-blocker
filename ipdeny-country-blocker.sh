@@ -23,14 +23,13 @@ fi
   for i in $@; do
     wget -O ${TMPDIR}/${i}.zone ${IPDENY}/${i}.zone
     if grep -q $(md5sum ${i}.zone) ${TMPDIR}/MD5SUM; then
-      cat ${TMPDIR}/${i}.zone | \
       while read cidr; do
         comment="${i} $(date)"
         ${IPTABLES} -A ${IPDENY_CHAIN} -s ${cidr} -j DROP -m comment --comment "${comment}"
         if [[ $? -ne 0 ]]; then
           echo "Failed to add ${cidr}"
         fi
-      done
+      done < ${TMPDIR}/${i}.zone
     else
       echo "MD5 hash does not match for ${i}.zone"
     fi
